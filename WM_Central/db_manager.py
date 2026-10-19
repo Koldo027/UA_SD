@@ -1,35 +1,36 @@
 import sqlite3
 
-DB_PATH = "central.db"
+DB_FILE = "central.db"
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS watering_stations (
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS estaciones (
             id TEXT PRIMARY KEY,
-            location TEXT,
-            status TEXT,
-            last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ubicacion TEXT,
+            estado TEXT,
+            caudal REAL DEFAULT 0.0,
+            volumen_total REAL DEFAULT 0.0
         )
     """)
+    cur.execute("UPDATE estaciones SET estado = 'DESCONECTADA'")
     conn.commit()
     conn.close()
 
-def registrar_o_actualizar_ws(ws_id, location, status="DISPONIBLE"):
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM watering_stations WHERE id = ?", (ws_id,))
-    row = cursor.fetchone()
-    if row is None:
-        cursor.execute(
-            "INSERT INTO watering_stations (id, location, status) VALUES (?, ?, ?)",
-            (ws_id, location, status)
-        )
-    else:
-        cursor.execute(
-            "UPDATE watering_stations SET location = ?, status = ?, last_seen = CURRENT_TIMESTAMP WHERE id = ?",
-            (location, status, ws_id)
-        )
+def registrar_estacion(ws_id, ubicacion):
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO estaciones (id, ubicacion, estado) VALUES (?, ?, 'DISPONIBLE')
+        ON CONFLICT(id) DO UPDATE SET ubicacion = ?, estado = 'DISPONIBLE'
+    """, (ws_id, ubicacion, ubicacion))
+    conn.commit()
+    conn.close()
+
+def actualizar_estado(ws_id, nuevo_estado):
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("UPDATE estaciones SET estado = ? WHERE id = ?", (nuevo_estado, ws_id))
     conn.commit()
     conn.close()
