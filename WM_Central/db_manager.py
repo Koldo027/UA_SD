@@ -39,6 +39,6 @@ def obtener_estaciones():
     conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
     cur.execute("SELECT id, ubicacion, estado, caudal, volumen_total FROM estaciones")
-    conn.commit()
+    rows = cur.fetchall()
     conn.close()
-    
+    return rows
