@@ -3,18 +3,25 @@ import socket
 import threading
 import sys
 from common.sockets_protocol import parse_msg, build_msg
+from WM_Central.db_manager import init_db, registrar_estacion, actualizar_estado, obtener_estaciones
+
+VERDE = "\033[92m"
+ROJO = "\033[91m"
+NARANJA = "\033[93m"
+GRIS = "\033[90m"
+RESET = "\033[0m"
 
 def imprimir_panel():
     estaciones = obtener_estaciones()
     print("\n [Central] Panel de monitorización de riego \n")
     for id_ws, ubi, est, caud, vol in estaciones:
-        color = "\033[90m"
-        if est == "DISPONIBLE": color = "\033[92m"
-        elif est == "REGANDO": color = "\033[92m" # En la consola se indica activo
-        elif est == "AVERIA" or est == "FUGA": color = "\033[91m"
-        elif est == "FUERA_SERVICIO": color = "\033[93m"
+        color = GRIS
+        if est == "DISPONIBLE": color = VERDE
+        elif est == "REGANDO": color = VERDE # En la consola se indica activo
+        elif est == "AVERIA" or est == "FUGA": color = ROJO
+        elif est == "FUERA_SERVICIO": color = NARANJA
 
-        print(f"WS: {id_ws:<6} | Ubic: {ubi:<15} | Estado: {color}{est:<15}{"\033[0m"} | Caudal: {caud} L/min")
+        print(f"WS: {id_ws:<6} | Ubic: {ubi:<15} | Estado: {color}{est:<15}{RESET} | Caudal: {caud} L/min")
     print("="*50 + "\n")
 
 def handle_monitor_client(conn, addr):
