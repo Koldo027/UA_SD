@@ -14,10 +14,12 @@ def empaquetar(mensaje: str) -> str:
 def desempaquetar(trama: str):
     if not trama.startswith(STX) or ETX not in trama:
         return None
-    else:
+    try:
         fin_datos = trama.rfind(ETX)
         datos = trama[1:fin_datos]
         lrc_recibido = trama[fin_datos + 1:]
         if calcular_lrc(datos) == lrc_recibido:
             return datos
+        return None
+    except Exception:
         return None

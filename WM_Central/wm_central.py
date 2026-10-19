@@ -17,7 +17,7 @@ def imprimir_panel():
     for id_ws, ubi, est, caud, vol in estaciones:
         color = GRIS
         if est == "DISPONIBLE": color = VERDE
-        elif est == "REGANDO": color = VERDE # En la consola se indica activo
+        elif est == "REGANDO": color = VERDE
         elif est == "AVERIA" or est == "FUGA": color = ROJO
         elif est == "FUERA_SERVICIO": color = NARANJA
 
