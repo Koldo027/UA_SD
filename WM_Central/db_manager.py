@@ -34,3 +34,11 @@ def actualizar_estado(ws_id, nuevo_estado):
     cur.execute("UPDATE estaciones SET estado = ? WHERE id = ?", (nuevo_estado, ws_id))
     conn.commit()
     conn.close()
+    
+def obtener_estaciones():
+    conn = sqlite3.connect(DB_FILE)
+    cur = conn.cursor()
+    cur.execute("SELECT id, ubicacion, estado, caudal, volumen_total FROM estaciones")
+    conn.commit()
+    conn.close()
+    
