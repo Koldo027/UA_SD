@@ -3,20 +3,37 @@ import sys
 import time
 from common.sockets_protocol import build_msg, parse_msg
 
-def run_monitor(central_ip, central_port, ws_id, location="River Park"):
-    try:
-        central_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        central_sock.connect((central_ip, central_port))
-        
-        reg_msg = build_msg("REGISTRO", ws_id, location)
-        central_sock.send(reg_msg.encode('utf-8'))
-        
-        response = central_sock.recv(1024).decode('utf-8')
-        print(f"[MONITOR {ws_id}] Respuesta de Central: {response}")
-        central_sock.close()
-    except Exception as e:
-        print(f"[MONITOR {ws_id}] Error conectando a Central: {e}")
-        return
+hay_fuga = False
+
+def hilo_servidor_engine(puerto_engine, ws_id, ip_central, puerto_central):
+    global hay_fuga
+    srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    srv.bind(('0.0.0.0', puerto_engine))
+    srv.listen(1)
+    print(f"[{ws_id}-M] Esperando conexion local del Engine en puerto {puerto_engine}...")
+    conn, addr = srv.accept()
+    print(f"[{ws_id}-M] Engine conectado.")
+
+    while True:
+        time.sleep(1)
+        try:
+            conn.send(empaquetr("HEALTH_CHECK").encode('utf-8'))
+            conn.settimeout(2.0)
+            raw = conn.recv(1024).decode('utf-8')
+            resp = desempaquetar(raw)
+
+            if not resp or resp == "KO":
+                if not hay_fuga:
+                    print(f"[{ws_id}-M] Fallo en Engine detectado. Reportando a Central...")
+                    reportar_fuga_a_central()
+                    hay_fuga = True
+            else:
+                hay_fuga = False
+        except socket.timout:
+            if not hay_fuga:
+                print(f"[{ws_id}-M] Timeout con Engine. Avisando a Central...")
+                reportar_fuga_a_central()
+                hay_fuga = True
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
