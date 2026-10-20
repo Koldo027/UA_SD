@@ -24,17 +24,23 @@ def imprimir_panel():
         print(f"WS: {id_ws:<6} | Ubic: {ubi:<15} | Estado: {color}{est:<15}{RESET} | Caudal: {caud} L/min")
     print("="*50 + "\n")
 
-def handle_monitor_client(conn, addr):
+def atender_monitor(conn, addr):
     print(f"[CENTRAL] Nueva conexión desde {addr}")
     try:
-        data = conn.recv(1024).decode('utf-8')
-        if data:
-            parts = parse_msg(data)
-            if parts[0] == "REGISTRO":
-                ws_id, location = parts[1], parts[2]
-                print(f"[CENTRAL] Registrando Estación {ws_id} en {location}")
-                response = build_msg("STATUS", "OK", "Estacion registrada correctamente")
-                conn.send(response.encode('utf-8'))
+        raw = conn.recv(1024).decode('utf-8')
+        mensaje = desempaquetar(raw)
+        if mensaje:
+            partes = mensaje.split("#")
+            if partes[0] == "REGISTRO":
+                ws_id, ubi = partes[1], partes[2]
+                registrar_estacion(ws_id, ubi)
+                conn.send(empaquetar("STATUS#OK#Registrado").encode('utf-8'))
+                imprimir_panel()
+            elif partes[0] == "ALERTA_FUGA":
+                ws_id = partes[1]
+                actualizar_estado(ws_id, "FUGA")
+                conn.send(empaquetar("STATUS#ACK_FUGA").encode('utf-8'))
+                imprimir_panel()
     except Exception as e:
         print(f"[CENTRAL] Error con {addr}: {e}")
     finally:
