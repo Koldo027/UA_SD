@@ -25,15 +25,24 @@ def hilo_servidor_engine(puerto_engine, ws_id, ip_central, puerto_central):
             if not resp or resp == "KO":
                 if not hay_fuga:
                     print(f"[{ws_id}-M] Fallo en Engine detectado. Reportando a Central...")
-                    reportar_fuga_a_central()
+                    reportar_fuga_a_central(ws_id, ip_central, puerto_central)
                     hay_fuga = True
             else:
                 hay_fuga = False
         except socket.timout:
             if not hay_fuga:
                 print(f"[{ws_id}-M] Timeout con Engine. Avisando a Central...")
-                reportar_fuga_a_central()
+                reportar_fuga_a_central(ws_id, ip_central, puerto_central)
                 hay_fuga = True
+
+def reportar_fuga_a_central(ws_id, ip, puerto):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip, puerto))
+        s.send(empaquetar(f"ALERTA_FUGA#{ws_id}").encode('utf-8'))
+        s.close()
+    except Exception as e:
+        print(f"[{ws_id}-M] Imposible conectar con WM_Central: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
