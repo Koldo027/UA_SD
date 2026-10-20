@@ -44,6 +44,17 @@ def reportar_fuga_a_central(ws_id, ip, puerto):
     except Exception as e:
         print(f"[{ws_id}-M] Imposible conectar con WM_Central: {e}")
 
+def registrarse(ws_id, ubi, ip, puerto):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip, puerto))
+        s.send(empaquetar(f"REGISTRO#{ws_id}#{ubi}").encode('utf-8'))
+        raw = s.recv(1024).decode('utf-8')
+        print(f"[{ws_id}-M] Respuesta Central: {desempaquetar(raw)}")
+        s.close()
+    except Exception as e:
+        print(f"[{ws_id}-M] Imposible conectar con WM_Central: {e}")
+
 if __name__ == "__main__":
     if len(sys.argv) < 4:
         print("Uso: python wm_ws_m.py <Puerto_Engine> <Central_IP>:<Central_Port> <ID_WS>")
