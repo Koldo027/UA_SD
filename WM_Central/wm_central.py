@@ -64,8 +64,16 @@ if __name__ == "__main__":
     port = int(sys.argv[1])
     kafka_broker = sys.argv[2]
 
-    socket_thread = threading.Thread(target=start_socket_server, args=(port,))
-    socket_thread.daemon = True
-    socket_thread.start()
+    init_db()
+    print("[CENTRAL] Base de datos SQLite lista.")
+    imprimir_panel()
 
-    socket_thread.join()
+    t_socket = threading.Thread(target=socket_listener, args=(puerto_socket,), daemon=True)
+    t_socket.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n[CENTRAL] Apagando el servidor central de forma ordenada...")
+        sys.exit(0)
