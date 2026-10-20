@@ -60,7 +60,9 @@ if __name__ == "__main__":
         print("Uso: python wm_ws_m.py <Puerto_Engine> <Central_IP>:<Central_Port> <ID_WS>")
         sys.exit(1)
 
+    p_engine = int(sys.argv[1])
     central_ip, central_port = sys.argv[2].split(":")
     ws_id = sys.argv[3]
 
-    run_monitor(central_ip, int(central_port), ws_id)
+    registrarse(ws_id, "River Park", central_ip, int(central_port))
+    hilo_servidor_engine(p_engine, ws_id, central_ip, int(central_port))
