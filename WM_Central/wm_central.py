@@ -1,8 +1,7 @@
-# central/wm_central.py
 import socket
 import threading
 import sys
-from common.sockets_protocol import parse_msg, build_msg
+from sockets_protocol import parse_msg, build_msg
 from WM_Central.db_manager import init_db, registrar_estacion, actualizar_estado, obtener_estaciones
 
 VERDE = "\033[92m"

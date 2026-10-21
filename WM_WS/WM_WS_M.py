@@ -1,7 +1,7 @@
 import socket
 import sys
 import time
-from common.sockets_protocol import build_msg, parse_msg
+from sockets_protocol import build_msg, parse_msg
 
 hay_fuga = False
 
